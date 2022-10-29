@@ -1,0 +1,65 @@
+###############################################################################
+groups:
+
+- name: WindowsFreeDiskSpace
+  rules:
+  - alert: WindowsDiskSpacePercent
+    expr: 100*windows_logical_disk_free_bytes/windows_logical_disk_size_bytes{volume=~"[C-Z]:"} < 10
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : Free space on {{ $labels.volume }} == {{ $value }} < 10%"
+
+  - alert: WindowsDiskSpaceGb
+    expr: windows_logical_disk_free_bytes{volume=~"[C-Z]:"}/1024/1024/1024 < 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : Free space on {{ $labels.volume }} == { ceil($value/1024/1024/1024) } < 5Gb"
+#      description: ""
+
+###############################################################################
+
+- name: WindowsUptime
+  rules:
+  - alert: WindowsUptimeWarning
+    expr:  (time()-windows_system_system_up_time)/86400 > 30
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : Uptime == {{ $value }} days > 30"
+
+###############################################################################
+
+- name: WindowsDiskLatency
+  rules:
+  - alert: WindowsDiskLatencyRead
+    expr:  irate(windows_logical_disk_read_latency_seconds_total [5m]) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : Disk {{ $labels.volume }} read latency == {{ $value }} seconds > 1"
+
+  - alert: WindowsDiskLatencyWrite
+    expr:  irate(windows_logical_disk_write_latency_seconds_total [5m]) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : Disk {{ $labels.volume }} write latency == {{ $value }} seconds > 1"
+
+###############################################################################
+
+- name: WindowsCPU
+  rules:
+  - alert: WindowsCPUHigh
+    expr:  avg by (instance) (100-(irate(windows_cpu_time_total{mode="idle"}[5m]))*100) > 70
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{ $labels.instance }} : CPU Utilization == {{ $value }}% > 70"

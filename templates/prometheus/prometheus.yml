@@ -1,0 +1,25 @@
+# my global config
+global:
+  scrape_interval:     10s
+  evaluation_interval: 120s
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+        - prom-alertmanager:9093
+
+rule_files:
+    - './alerts/*.yml'
+
+scrape_configs:
+
+# scrape configs for local services
+- job_name: exporters-local
+  file_sd_configs:
+    - files:
+      - './local/*.yml'
+      refresh_interval: 10s
+
+# Additional scrape configs
+{{ scrape_config }}

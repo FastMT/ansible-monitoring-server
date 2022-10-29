@@ -1,0 +1,11 @@
+- targets: ["node-exporter:9100"]
+  labels:
+    instance: "{{ inventory_hostname }}"
+    environment: "local"
+    exporter_type: "linux"
+
+- targets: ["cadvisor:8080"]
+  labels:
+    instance: "{{ inventory_hostname }}"
+    environment: "local"
+    exporter_type: "cadvisor"

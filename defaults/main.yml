@@ -1,0 +1,9 @@
+# Root folder for monitoring deployment
+monitoring_root: "/opt/monitoring"
+
+# Prometheus scrape interval
+monitoring_prometheus_refresh_interval: "10s"
+
+# Prometheus retention 
+monitoring_prometheus_retention_size: "120GB"
+monitoring_prometheus_retention_time: "365d"

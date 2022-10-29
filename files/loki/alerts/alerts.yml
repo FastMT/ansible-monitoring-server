@@ -1,0 +1,8 @@
+groups:
+  - name: rate-alerting
+    rules:
+    - alert: HighLogRate
+      expr: |
+           count_over_time(({job="grafana"})[1m]) >=0
+      for: 1m
+

@@ -1,0 +1,29 @@
+---
+
+route:
+  group_wait: 20s
+  group_interval: 20s
+  group_by:
+  - alertname
+  - instance
+  repeat_interval: 60m
+{% if prometheus_telegram_token is defined %}
+  receiver: 'telegram-bot'
+{% endif %}
+
+receivers:
+
+{% if prometheus_telegram_token is defined %}
+- name: 'telegram-bot'
+  telegram_configs:
+  - api_url: https://api.telegram.org
+    bot_token: {{prometheus_telegram_token}}
+    chat_id: {{prometheus_telegram_chat_id}}
+    disable_notifications: false
+    parse_mode: HTML
+    send_resolved: true
+    message: '{{ '{{' }} template "telegram.html.message" . {{ '}}' }}'
+{% endif %}
+    
+templates:
+- '/etc/alertmanager/templates/*.tmpl'

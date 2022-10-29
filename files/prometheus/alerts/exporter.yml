@@ -1,0 +1,23 @@
+###############################################################################
+#
+# Severities:
+# - critical
+# - error
+# - warning
+# - info
+
+groups:
+
+###############################################################################
+
+- name: ExporterDown
+  rules:
+  - alert: NodeDown
+    expr: up == 0
+    for: 30s
+    labels:
+      severity: Error
+    annotations:
+      summary: 'Target {{ $labels.instance }}:{{ $labels.exporter_type }} is down'
+#      description: 'Service: {{ $labels.service }}'
+

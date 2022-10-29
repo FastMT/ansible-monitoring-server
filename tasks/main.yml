@@ -1,0 +1,153 @@
+---
+
+- name: Warn if telegram token is not defined
+  debug:
+    msg: "prometheus_telegram_token is not defined - telegram bot will be removed from docker config"
+  when: prometheus_telegram_token is not defined
+
+- name: Warn if monitoring_mail_server token is not defined
+  debug:
+    msg: "monitoring_mail_server is not defined - mail server will be removed from docker config"
+  when: monitoring_mail_server is not defined
+
+- name: Create monitoring folders
+  file: 
+    path: "{{ monitoring_root }}/{{item.path}}"
+    state: directory
+    mode: "{{ item.mode }}"
+  become: yes
+  loop:
+    - { mode: 777, path: "alertmanager-bot-data" }
+    - { mode: 777, path: "alertmanager-data" }
+    - { mode: 777, path: "alertmanager" }
+    - { mode: 777, path: "alertmanager/templates" }
+    - { mode: 777, path: "grafana-data" }
+#    - { mode: 777, path: "loki-data" }
+#    - { mode: 777, path: "loki" }
+    - { mode: 755, path: "loki/alerts" }
+    - { mode: 777, path: "prometheus-data" }
+    - { mode: 755, path: "prometheus/" }
+    - { mode: 755, path: "prometheus/alerts" }
+    - { mode: 755, path: "prometheus/local" }
+    - { mode: 755, path: "nginx/conf" }
+    - { mode: 777, path: "nginx/log" }
+    - { mode: 777, path: "certbot/www" }
+    - { mode: 777, path: "certbot/conf" }
+    - { mode: 777, path: "certbot/log" }
+
+
+- name: Create custom monitoring folders
+  file: 
+    path: "{{ monitoring_root }}/prometheus/{{ item.path }}"
+    state: directory
+    mode: "755"
+  become: yes
+  with_items: "{{ scrape_folders }}"
+
+- name: Print scrape folders
+  debug:
+    msg: "An item: {{ item.path }}, {{ item.proxy_url | default ('') }}"
+  with_items: "{{ scrape_folders }}"
+  when: scrape_folders is defined
+
+# Create custom scrape folders config
+# Use honor_labels: false string when proxy_url is not defined as a workaround 
+- set_fact:
+    scrape_config: |
+      {{ scrape_config | default ('') }}
+      - job_name: exporters-{{ item.path }}
+        {{ (item.proxy_url is defined) | ternary('proxy_url','honor_labels') }}: {{ (item.proxy_url is defined) | ternary(item.proxy_url,'false') }}
+        file_sd_configs:
+          - files:
+            - './{{ item.path }}/*.yml'
+            refresh_interval: {{ monitoring_prometheus_refresh_interval }}
+  with_items: "{{ scrape_folders }}"
+  when: scrape_folders is defined
+    
+- name: Deploy Prometheus configuration files from templates
+  ansible.builtin.template:
+    src:  "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    mode: "{{ item.mode }}"
+  become: yes
+  loop:
+    - { mode: 644, src: "prometheus/prometheus.yml",        dst: "{{ monitoring_root }}/prometheus" }
+    - { mode: 644, src: "prometheus/local/localhost.yml",   dst: "{{ monitoring_root }}/prometheus/local" }
+    - { mode: 644, src: "alertmanager/alertmanager.yml",    dst: "{{ monitoring_root }}/alertmanager" }
+#    - { mode: 644, src: "loki/loki-config.yml",             dst: "{{ monitoring_root }}/loki" }
+    - { mode: 644, src: "nginx/monitoring.conf",           dst: "{{ monitoring_root }}/nginx/conf" }
+    - { mode: 644, src: "docker-compose.yml",               dst: "{{ monitoring_root }}" }
+    - { mode: 755, src: "certbot.sh",                       dst: "{{ monitoring_root }}" }
+  register: upload_templates
+
+- name: Deploy config files
+  ansible.builtin.copy:
+    src:  "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    mode: "{{ item.mode }}"
+  become: yes
+  loop:
+    - { mode: 644, src: "prometheus/alerts/exporter.yml",   dst: "{{ monitoring_root }}/prometheus/alerts" }
+    - { mode: 644, src: "prometheus/alerts/linux.yml",      dst: "{{ monitoring_root }}/prometheus/alerts" }
+    - { mode: 644, src: "prometheus/alerts/windows.yml",    dst: "{{ monitoring_root }}/prometheus/alerts" }
+#    - { mode: 644, src: "loki/alerts/alerts.yml",           dst: "{{ monitoring_root }}/loki/alerts" }
+    - { mode: 644, src: "alertmanager/templates/telegram.tmpl",    dst: "{{ monitoring_root }}/alertmanager/templates/" }
+  register: upload_files
+
+- name: Run certbot to generate certificate if it does not exist
+  ansible.builtin.shell: "./certbot.sh"
+  args:
+    chdir: "{{ monitoring_root }}"
+    creates: "{{ monitoring_root }}/certbot/conf/live/{{ inventory_hostname }}/fullchain.pem"
+  become: yes
+  check_mode: no
+  register: certbot_gen
+
+- name: Print certbot script output
+  debug:
+    var: certbot_gen
+  when: certbot_gen.changed
+
+- name: Get stats of the certificate file
+  ansible.builtin.stat:
+    path: "{{ monitoring_root }}/certbot/conf/live/{{ inventory_hostname }}/fullchain.pem"
+  become: yes
+  register: st
+
+- name: Fail if certificate file is missing
+  ansible.builtin.fail:
+    msg: "Letsencrypt certificate was not generated"
+  when: st.stat.exists == false
+
+- name: Generate dhparams.pem for nginx if it not exists
+  shell: "openssl dhparam -out {{ monitoring_root }}/nginx/dhparams.pem 2048"
+  args:
+    creates: "{{ monitoring_root }}/nginx/dhparams.pem"
+  check_mode: no
+  become: yes
+
+- name: Deploy prometheus containers using docker-compose
+  community.docker.docker_compose:
+    project_src: "{{ monitoring_root }}"
+    remove_orphans: yes
+    recreate: "smart"
+    pull: yes
+  become: yes
+
+- name: Restart containers if needed
+  community.docker.docker_compose:
+    project_src: "{{ monitoring_root }}"
+    restarted: yes
+  become: yes
+  when: upload_files.changed or upload_templates.changed
+
+- name: Add letsencrypt cronjob for cert renewal
+  ansible.builtin.cron:
+    name: monitoring_certbot
+    weekday: "6"
+    minute: "11"
+    hour: "23"
+    user: root
+    job: "cd {{monitoring_root}} && bash ./certbot.sh"
+    cron_file: monitoring_certbot
+  become: yes
