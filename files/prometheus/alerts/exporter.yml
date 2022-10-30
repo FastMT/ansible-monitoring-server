@@ -16,7 +16,7 @@ groups:
     expr: up == 0
     for: 30s
     labels:
-      severity: Error
+      severity: critical
     annotations:
       summary: 'Target {{ $labels.instance }}:{{ $labels.exporter_type }} is down'
 #      description: 'Service: {{ $labels.service }}'

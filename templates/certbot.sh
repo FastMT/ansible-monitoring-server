@@ -10,5 +10,5 @@ docker run -i --rm --name=certbot-proxy \
  -w /var/www/certbot\
  --force-renewal \
  --email {{ monitoring_mail_from | default(monitoring_mail_user | default (letsencrypt_email) )}} \
- -d {{ inventory_hostname }} \
+ -d {{ monitoring_server_host | default (inventory_hostname) }} \
  --agree-tos --noninteractive

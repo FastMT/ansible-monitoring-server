@@ -1,29 +1,72 @@
 ---
 
+global:
+{% if prometheus_slack_url is defined %}
+  slack_api_url: {{ prometheus_slack_url }}
+{% endif %}
+
+
 route:
   group_wait: 20s
   group_interval: 20s
   group_by:
-  - alertname
-  - instance
+    - alertname
+    - instance
   repeat_interval: 60m
+
+  # Discard all alerts by defauld
+  receiver: 'blackhole'
+
+  routes:
+
+{% if prometheus_slack_url is defined %}
+  - receiver: slack
+    match_re:
+      severity: "info|warning|critical"
+{% endif %}
+
 {% if prometheus_telegram_token is defined %}
-  receiver: 'telegram-bot'
+  - receiver: telegram
+    match_re:
+      severity: "info|warning|critical"
 {% endif %}
 
 receivers:
 
-{% if prometheus_telegram_token is defined %}
-- name: 'telegram-bot'
-  telegram_configs:
-  - api_url: https://api.telegram.org
-    bot_token: {{prometheus_telegram_token}}
-    chat_id: {{prometheus_telegram_chat_id}}
-    disable_notifications: false
-    parse_mode: HTML
-    send_resolved: true
-    message: '{{ '{{' }} template "telegram.html.message" . {{ '}}' }}'
+  # Default receiver to discard alerts
+  - name: 'blackhole'
+
+{% if prometheus_slack_url is defined %}
+  - name: slack
+    slack_configs:
+    - channel: '#prometheus-alerts'
+      send_resolved: true
+      icon_url: https://avatars3.githubusercontent.com/u/3380462
+      title: |-
+        [{{ '{{' }} .Status | toUpper -{{ '}}' }}
+        {{ '{{' }} if eq .Status "firing" {{ '}}' }}:{{ '{{' }} .Alerts.Firing | len {{ '}}' }}{{ '{{' }}- end -{{ '}}' }}
+        ] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}
+
+      text: >-
+        {{ '{{' }} range .Alerts -{{ '}}' }}
+
+        {{ '{{' }} .Annotations.summary {{ '}}' }}
+
+        {{ '{{' }} end {{ '}}' }}
 {% endif %}
-    
+
+{% if prometheus_telegram_token is defined %}
+  - name: 'telegram'
+    telegram_configs:
+    - api_url: https://api.telegram.org
+      bot_token: {{ prometheus_telegram_token }}
+      chat_id: {{ prometheus_telegram_chat_id }}
+      disable_notifications: false
+      parse_mode: HTML
+      send_resolved: true
+      message: '{{ '{{' }} template "telegram.html.message" . {{ '}}' }}'
+{% endif %}
+
+
 templates:
 - '/etc/alertmanager/templates/*.tmpl'
