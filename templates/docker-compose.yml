@@ -22,8 +22,8 @@ services:
     volumes:
       - "./prometheus-data:/prometheus"
       - "./prometheus:/etc/prometheus"
-    ports:
-      - 9090:9090
+    expose:
+      - 9090
     command: >-
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.retention.size {{ monitoring_prometheus_retention_size }}
@@ -36,8 +36,8 @@ services:
     volumes:
       - "./alertmanager:/etc/alertmanager"
       - "./alertmanager-data:/alertmanager/"
-    ports:
-      - 9093:9093
+    expose:
+      - 9093
     command: >-
       --config.file=/etc/alertmanager/alertmanager.yml
       --storage.path=/alertmanager
@@ -61,8 +61,8 @@ services:
       - "GF_SMTP_FROM_ADDRESS={{ monitoring_mail_from | default(monitoring_mail_user)}}"
       - "GF_SMTP_PASSWORD={{ monitoring_mail_password }}"
 {% endif %}
-    ports:
-      - 3000:3000
+    expose:
+      - 3000
     depends_on:
       - prometheus
 
@@ -75,8 +75,8 @@ services:
       - "./loki-data:/loki"
       - "./loki/loki-config.yml:/etc/loki/local-config.yaml"
       - "./loki/alerts:/loki/rules/fake"
-    ports:
-      - 3100:3100
+    expose:
+      - 3100
 {% endif %}
 
   node-exporter:
