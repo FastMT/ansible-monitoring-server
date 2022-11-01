@@ -54,7 +54,7 @@ services:
       - "GF_INSTALL_PLUGINS=camptocamp-prometheus-alertmanager-datasource,grafana-piechart-panel"
       - "GF_USERS_DEFAULT_THEME=light"
       - "GF_SERVER_ROOT_URL=https://{{ monitoring_server_host | default (inventory_hostname) }}"
-{% if prometheus_telegram_token is defined %}
+{% if monitoring_mail_server is defined %}
       - "GF_SMTP_ENABLED=true"
       - "GF_SMTP_HOST={{ monitoring_mail_server }}:25"
       - "GF_SMTP_USER={{ monitoring_mail_user }}"
