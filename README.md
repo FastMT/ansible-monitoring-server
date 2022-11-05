@@ -26,10 +26,27 @@ playbook.yml:
 # Configure Ubuntu common parameters
 - role: monitoring-server"
     vars:
-      # Optional parameter - not ask password on sudo (default: yes)
-      sudo_nopasswd: yes
+      # Email for letsencrypt certificates
+      letsencrypt_email: "user@server.com"
 
-      # Optional parameter - sysctl config
-      linux_sysctl:
-        - { name: "systctl.config.parameter",     value: 1 }      
+      # Optional mail server parameters
+      monitoring_mail_server:       "smtp.server.com"
+      monitoring_mail_user:         "user@server.com"
+      monitoring_mail_password:     "pa$$word"
+
+      # Optional Telegram bot parameters for alerts
+      monitoring_telegram_token:    "***:***"
+      monitoring_telegram_chat_id:  "123456"
+
+      # Optional Slack bot parameters for alerts
+      prometheus_slack_url: 'https://hooks.slack.com/services/**********'
+      prometheus_slack_channel: '#prometheus-alerts'
+
+      # Optional Prometheus retention parameters
+      monitoring_prometheus_retention_size: "120GB"
+      monitoring_prometheus_retention_time: "365d"
+
+      # Optional parameter for Prometheus scrape interval
+      monitoring_prometheus_refresh_interval: "10s"
+
 ```   

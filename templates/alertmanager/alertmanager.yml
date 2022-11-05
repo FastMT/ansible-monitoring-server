@@ -39,7 +39,7 @@ receivers:
 {% if monitoring_slack_url is defined %}
   - name: slack
     slack_configs:
-    - channel: '#prometheus-alerts'
+    - channel: '{{ prometheus_slack_channel }}'
       send_resolved: true
       icon_url: https://avatars3.githubusercontent.com/u/3380462
       title: |-
