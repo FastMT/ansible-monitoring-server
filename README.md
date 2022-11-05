@@ -9,7 +9,7 @@ Create requirements.yml file
 # Include monitoring-server role
 - src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
-  version: "v1.0.0"
+  version: "v1.0.1"
 ```
 
 Install external module into ~/.ansible/roles folder
@@ -39,8 +39,8 @@ playbook.yml:
       monitoring_telegram_chat_id:  "123456"
 
       # Optional Slack bot parameters for alerts
-      prometheus_slack_url: 'https://hooks.slack.com/services/**********'
-      prometheus_slack_channel: '#prometheus-alerts'
+      monitoring_slack_url: 'https://hooks.slack.com/services/**********'
+      monitoring_slack_channel: '#prometheus-alerts'
 
       # Optional Prometheus retention parameters
       monitoring_prometheus_retention_size: "120GB"
