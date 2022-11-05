@@ -1,8 +1,8 @@
 ---
 
 global:
-{% if prometheus_slack_url is defined %}
-  slack_api_url: {{ prometheus_slack_url }}
+{% if monitoring_slack_url is defined %}
+  slack_api_url: {{ monitoring_slack_url }}
 {% endif %}
 
 
@@ -19,13 +19,13 @@ route:
 
   routes:
 
-{% if prometheus_slack_url is defined %}
+{% if monitoring_slack_url is defined %}
   - receiver: slack
     match_re:
       severity: "info|warning|critical"
 {% endif %}
 
-{% if prometheus_telegram_token is defined %}
+{% if monitoring_telegram_token is defined %}
   - receiver: telegram
     match_re:
       severity: "info|warning|critical"
@@ -36,7 +36,7 @@ receivers:
   # Default receiver to discard alerts
   - name: 'blackhole'
 
-{% if prometheus_slack_url is defined %}
+{% if monitoring_slack_url is defined %}
   - name: slack
     slack_configs:
     - channel: '#prometheus-alerts'
@@ -55,12 +55,12 @@ receivers:
         {{ '{{' }} end {{ '}}' }}
 {% endif %}
 
-{% if prometheus_telegram_token is defined %}
+{% if monitoring_telegram_token is defined %}
   - name: 'telegram'
     telegram_configs:
     - api_url: https://api.telegram.org
-      bot_token: {{ prometheus_telegram_token }}
-      chat_id: {{ prometheus_telegram_chat_id }}
+      bot_token: {{ monitoring_telegram_token }}
+      chat_id: {{ monitoring_telegram_chat_id }}
       disable_notifications: false
       parse_mode: HTML
       send_resolved: true

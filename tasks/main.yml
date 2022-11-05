@@ -2,8 +2,8 @@
 
 - name: Warn if telegram token is not defined
   debug:
-    msg: "prometheus_telegram_token is not defined - telegram bot will be removed from docker config"
-  when: prometheus_telegram_token is not defined
+    msg: "monitoring_telegram_token is not defined - telegram bot will be removed from docker config"
+  when: monitoring_telegram_token is not defined
 
 - name: Warn if monitoring_mail_server token is not defined
   debug:
