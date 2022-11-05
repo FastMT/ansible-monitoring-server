@@ -6,8 +6,8 @@ Ansible role to configure basic parameters on linux (Ubuntu) server
 Create requirements.yml file
 
 ```
-# Include ubuntu-common role
-- src: git@github.com:FastMT/ansible-monitoring-server.git
+# Include monitoring-server role
+- src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
   version: "v1.0.0"
 ```
