@@ -4,21 +4,23 @@ groups:
 - name: LinuxFreeDiskSpace
   rules:
   - alert: LinuxDiskSpacePercent
-    expr: 100*node_filesystem_free_bytes/node_filesystem_size_bytes{fstype="ext4"} < 10
-    for: 1m
+    expr: 100*node_filesystem_free_bytes/node_filesystem_size_bytes{fstype="ext4"} < %%monitoring_LinuxDiskSpacePercent_limit%%
+    for: %%monitoring_LinuxDiskSpacePercent_time%%
     labels:
       severity: warning
     annotations:
-      summary: "{{ $labels.instance }}: Free space on {{ $labels.mountpoint }} == {{ $value }} < 10%"
+      summary: >-
+        {{ $labels.instance }}: Free space on {{ $labels.mountpoint }} == {{ $value }} < %%monitoring_LinuxDiskSpacePercent_limit%% %
 
   - alert: LinuxDiskSpaceGb
     # Checking only volumes with size >10Gb
-    expr: node_filesystem_free_bytes{fstype="ext4"}/1024/1024/1024 < 5 and node_filesystem_size_bytes{fstype="ext4"} >10*1024*1024*1024
-    for: 1m
+    expr: node_filesystem_free_bytes{fstype="ext4"}/1024/1024/1024 < %%monitoring_LinuxDiskSpaceGb_limit%% and node_filesystem_size_bytes{fstype="ext4"} >10*1024*1024*1024
+    for: %%monitoring_LinuxDiskSpaceGb_time%%
     labels:
       severity: warning
     annotations:
-      summary: "{{ $labels.instance }}: Free space on {{ $labels.mountpoint }} == { ceil($value/1024/1024/1024) } Gb < 5Gb"
+      summary: >-
+        {{ $labels.instance }}: Free space on {{ $labels.mountpoint }} == { ceil($value/1024/1024/1024) } Gb < %%monitoring_LinuxDiskSpaceGb_limit%%Gb
 
   # Please add ignored mountpoints in node_exporter parameters like
   # "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($|/)".
@@ -29,7 +31,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host disk will fill in 24 hours on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host disk will fill in 24 hours on instance {{ $labels.instance }} VALUE = {{ $value }}
 
   - alert: HostOutOfInodes
     expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
@@ -37,7 +40,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host out of inodes (instance {{ $labels.instance }}) (< 10% left) VALUE = {{ $value }}"
+      summary: >-
+        Host out of inodes (instance {{ $labels.instance }}) (< 10% left) VALUE = {{ $value }}
 
   - alert: HostInodesWillFillIn24Hours
     expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and predict_linear(node_filesystem_files_free{mountpoint="/rootfs"}[1h], 24 * 3600) < 0 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
@@ -45,31 +49,34 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host inodes will fill in 24 hours on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host inodes will fill in 24 hours on instance {{ $labels.instance }} VALUE = {{ $value }}
 
 ###############################################################################
 
 - name: LinixDiskIOTime
   rules:
   - alert: LinixDiskIOTimeHigh
-    expr: irate(node_disk_io_time_seconds_total [5m]) > %% monitoring_LinixDiskIOTimeHigh_limit %%
-    for: %% monitoring_LinixDiskIOTimeHigh_time %%
+    expr: irate(node_disk_io_time_seconds_total [5m]) > %%monitoring_LinixDiskIOTimeHigh_limit%%
+    for: %%monitoring_LinixDiskIOTimeHigh_time%%
     labels:
       severity: warning
     annotations:
-      summary: "{{ $labels.instance }} : Disk IO Time (/dev/{{ $labels.device }}) == {{ $value }} > %% monitoring_LinixDiskIOTimeHigh_limit %%"
+      summary: >-
+        {{ $labels.instance }} : Disk IO Time (/dev/{{ $labels.device }}) == {{ $value }} > %%monitoring_LinixDiskIOTimeHigh_limit%%
 
 ###############################################################################
 
 - name: LinixNetwork
   rules:
   - alert: LinixNetworkBandwidthReceiveHigh
-    expr:  irate(node_network_receive_bytes_total [5m])*8/1024/1024 > 300
-    for: 5m
+    expr:  irate(node_network_receive_bytes_total [5m])*8/1024/1024 > %%monitoring_LinixNetworkBandwidthReceiveHigh_limit%%
+    for: %%monitoring_LinixNetworkBandwidthReceiveHigh_time%%
     labels:
       severity: warning
     annotations:
-      summary: "{{ $labels.instance }} : Network In (/dev/{{ $labels.device }}) == {{ $value }} Mbit/s > 300"
+      summary: >-
+        {{ $labels.instance }} : Network In (/dev/{{ $labels.device }}) == {{ $value }} Mbit/s > %%monitoring_LinixNetworkBandwidthReceiveHigh_limit%%
 
   - alert: HostNetworkReceiveErrors
     expr: rate(node_network_receive_errs_total[2m]) / rate(node_network_receive_packets_total[2m]) > 0.01
@@ -77,7 +84,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host Network Receive Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes"
+      summary: >-
+        Host Network Receive Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes
 
   - alert: HostNetworkTransmitErrors
     expr: rate(node_network_transmit_errs_total[2m]) / rate(node_network_transmit_packets_total[2m]) > 0.01
@@ -85,7 +93,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host Network Transmit Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes"
+      summary: >-
+        Host Network Transmit Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes
 
   - alert: HostNetworkInterfaceSaturated
     expr: >-
@@ -96,7 +105,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host Network Interface \"{{ $labels.device }}\" Saturated on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host Network Interface \"{{ $labels.device }}\" Saturated on instance {{ $labels.instance }} VALUE = {{ $value }}
 
   - alert: HostConntrackLimit
     expr: node_nf_conntrack_entries / node_nf_conntrack_entries_limit > 0.8
@@ -104,7 +114,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host conntrack limit is approaching on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host conntrack limit is approaching on instance {{ $labels.instance }} VALUE = {{ $value }}
 
 ###############################################################################
 # Alerts from https://awesome-prometheus-alerts.grep.to/rules#host-and-hardware
@@ -112,12 +123,13 @@ groups:
 - name: LinixMemory
   rules:
   - alert: LinixOutOfMemory
-    expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
-    for: 2m
+    expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < %%monitoring_LinixOutOfMemory_limit%%
+    for: %%monitoring_LinixOutOfMemory_time%%
     labels:
       severity: warning
     annotations:
-      summary: "Host out of memory on instance {{ $labels.instance }} (< 10% left) VALUE = {{ $value }}"
+      summary: >-
+        Host out of memory on instance {{ $labels.instance }} (< %%monitoring_LinixOutOfMemory_limit%% % left) VALUE = {{ $value }}
 
   - alert: HostMemoryUnderMemoryPressure
     expr: rate(node_vmstat_pgmajfault[1m]) > 1000
@@ -125,7 +137,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host memory under memory pressure on instance {{ $labels.instance }}. High rate of major page faults VALUE = {{ $value }}"
+      summary: >-
+        Host memory under memory pressure on instance {{ $labels.instance }}. High rate of major page faults VALUE = {{ $value }}
 
   - alert: HostSwapIsFillingUp
     expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
@@ -133,7 +146,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host swap is filling up on instance {{ $labels.instance }} (>80%) VALUE = {{ $value }}"
+      summary: >-
+        Host swap is filling up on instance {{ $labels.instance }} (>80%) VALUE = {{ $value }}
 
   - alert: HostOomKillDetected
     expr: increase(node_vmstat_oom_kill[1m]) > 0
@@ -141,19 +155,21 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host OOM kill detected on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host OOM kill detected on instance {{ $labels.instance }} VALUE = {{ $value }}
 
 ###############################################################################
 
 - name: LinixCPU
   rules:
   - alert: HostHighCpuLoad
-    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
-    for: 0m
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > %%monitoring_HostHighCpuLoad_limit%%
+    for: %%monitoring_HostHighCpuLoad_time%%
     labels:
       severity: warning
     annotations:
-      summary: "CPU load on instance {{ $labels.instance }} is > 80% (VALUE = {{ $value }})"
+      summary: >-
+        CPU load on instance {{ $labels.instance }} is > %%monitoring_HostHighCpuLoad_limit%% % (VALUE = {{ $value }})
 
   - alert: HostCpuStealNoisyNeighbor
     expr: avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > %%monitoring_HostCpuStealNoisyNeighbor_limit%%
@@ -161,18 +177,20 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host CPU steal is > %%monitoring_HostCpuStealNoisyNeighbor_limit%% % ({{ $value }}) on instance {{ $labels.instance }}"
+      summary: >-
+        Host CPU steal is > %%monitoring_HostCpuStealNoisyNeighbor_limit%% % ({{ $value }}) on instance {{ $labels.instance }}
 
   # 1000 context switches is an arbitrary number.
   # Alert threshold depends on nature of application.
   # Please read: https://github.com/samber/awesome-prometheus-alerts/issues/58
   - alert: HostContextSwitching
-    expr: (rate(node_context_switches_total[5m])) / (count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})) > 30000
-    for: 0m
+    expr: (rate(node_context_switches_total[5m])) / (count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})) > %%monitoring_HostContextSwitching_limit%%
+    for: %%monitoring_HostContextSwitching_time%%
     labels:
       severity: warning
     annotations:
-      summary: "Host context switching on instance {{ $labels.instance }} is {{ $value }}"
+      summary: >-
+        Host context switching on instance {{ $labels.instance }} is {{ $value }} > %%monitoring_HostContextSwitching_limit%%
 
 ###############################################################################
 
@@ -184,21 +202,22 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Systemd service {{ $labels.name }} crashed on server {{ $labels.instance }}"
+      summary: >-
+        Systemd service {{ $labels.name }} crashed on server {{ $labels.instance }}
 
 ###############################################################################
 
 - name: LinixHardware
   rules:
   - alert: HostPhysicalComponentTooHot
-    expr: node_hwmon_temp_celsius > 80
-    for: 15m
+    expr: node_hwmon_temp_celsius > %%monitoring_HostPhysicalComponentTooHot_limit%%
+    for: %%monitoring_HostPhysicalComponentTooHot_time%%
     labels:
       severity: warning
     annotations:
-      summary: |
-        Host physical component too hot (instance {{ $labels.instance }})
-        temp = {{ $value }} sensor={{ $labels.sensor }} chip={{ $labels.chip }}"
+      summary: >-
+        Host physical component too hot (instance {{ $labels.instance }}) 
+        temp = {{ $value }}C sensor={{ $labels.sensor }} chip={{ $labels.chip }} > %%monitoring_HostPhysicalComponentTooHot_limit%%C
 
   - alert: HostNodeOvertemperatureAlarm
     expr: node_hwmon_temp_crit_alarm_celsius == 1
@@ -206,7 +225,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "Host node overtemperature alarm on instance {{ $labels.instance }} {{ $value }}"
+      summary: >-
+        Host node overtemperature alarm on instance {{ $labels.instance }} {{ $value }}
 
   - alert: HostRaidArrayGotInactive
     expr: node_md_state{state="inactive"} > 0
@@ -214,7 +234,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "RAID array {{ $labels.device }} is in degraded state on {{ $labels.instance }} (VALUE = {{ $value }})"
+      summary: >-
+        RAID array {{ $labels.device }} is in degraded state on {{ $labels.instance }} (VALUE = {{ $value }})
 
   - alert: HostRaidDiskFailure
     expr: node_md_disks{state="failed"} > 0
@@ -222,7 +243,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host RAID disk {{ $labels.md_device }} failure on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host RAID disk {{ $labels.md_device }} failure on instance {{ $labels.instance }} VALUE = {{ $value }}
 
 ###############################################################################
 
@@ -243,7 +265,8 @@ groups:
     labels:
       severity: info
     annotations:
-      summary: "Host {{ $labels.instance }} has had correctable {{ printf \"%.0f\" $value }} errors in the last minute. VALUE = {{ $value }}"
+      summary: >-
+        Host {{ $labels.instance }} has had correctable {{ printf \"%.0f\" $value }} errors in the last minute. VALUE = {{ $value }}
 
   - alert: HostEdacUncorrectableErrorsDetected
     expr: node_edac_uncorrectable_errors_total > 0
@@ -251,7 +274,8 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host {{ $labels.instance }} has had uncorrectable {{ printf \"%.0f\" $value }} errors. VALUE = {{ $value }}"
+      summary: >-
+        Host {{ $labels.instance }} has had uncorrectable {{ printf \"%.0f\" $value }} errors. VALUE = {{ $value }}
 
 ###############################################################################
 
@@ -263,4 +287,5 @@ groups:
     labels:
       severity: warning
     annotations:
-      summary: "Host clock skew on instance {{ $labels.instance }} VALUE = {{ $value }}"
+      summary: >-
+        Host clock skew on instance {{ $labels.instance }} VALUE = {{ $value }}

@@ -8,8 +8,40 @@ monitoring_prometheus_refresh_interval: "10s"
 monitoring_prometheus_retention_size: "120GB"
 monitoring_prometheus_retention_time: "365d"
 
+# Linux alerts thresholds
+
+# Min disk space in %
+monitoring_LinuxDiskSpacePercent_limit: 10
+monitoring_LinuxDiskSpacePercent_time: "1m"
+
+# Min disk space in Gb
+monitoring_LinuxDiskSpaceGb_limit: 5
+monitoring_LinuxDiskSpaceGb_time: "1m"
+
+# Max I/O time (0..1)
 monitoring_LinixDiskIOTimeHigh_limit: 0.5
 monitoring_LinixDiskIOTimeHigh_time: "5m"
 
+# Max network bandwidth in Gb
+monitoring_LinixNetworkBandwidthReceiveHigh_limit: 200
+monitoring_LinixNetworkBandwidthReceiveHigh_time: "5m"
+
+# Min available memory in %
+monitoring_LinixOutOfMemory_limit: 10
+monitoring_LinixOutOfMemory_time: "2m"
+
+# Max CPU load in %
+monitoring_HostHighCpuLoad_limit: 80
+monitoring_HostHighCpuLoad_time: "0m"
+
+# Max CPU steal time in %
 monitoring_HostCpuStealNoisyNeighbor_limit: 10
 monitoring_HostCpuStealNoisyNeighbor_time: "5m"
+
+# Max context switches per second
+monitoring_HostContextSwitching_limit: 30000
+monitoring_HostContextSwitching_time: "0m"
+
+# Max temperature
+monitoring_HostPhysicalComponentTooHot_limit: 80
+monitoring_HostPhysicalComponentTooHot_time: "15m"
