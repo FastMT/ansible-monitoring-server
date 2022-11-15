@@ -7,3 +7,6 @@ monitoring_prometheus_refresh_interval: "10s"
 # Prometheus retention 
 monitoring_prometheus_retention_size: "120GB"
 monitoring_prometheus_retention_time: "365d"
+
+monitoring_LinixDiskIOTimeHigh_limit: 0.5
+monitoring_LinixDiskIOTimeHigh_duration: "5m"

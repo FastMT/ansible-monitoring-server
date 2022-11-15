@@ -52,12 +52,12 @@ groups:
 - name: LinixDiskIOTime
   rules:
   - alert: LinixDiskIOTimeHigh
-    expr: irate(node_disk_io_time_seconds_total [5m]) > 0.5
-    for: 5m
+    expr: irate(node_disk_io_time_seconds_total [5m]) > %% monitoring_LinixDiskIOTimeHigh_limit %%
+    for: %% monitoring_LinixDiskIOTimeHigh_duration %%
     labels:
       severity: warning
     annotations:
-      summary: "{{ $labels.instance }} : Disk IO Time (/dev/{{ $labels.device }}) == {{ $value }} > 0.5"
+      summary: "{{ $labels.instance }} : Disk IO Time (/dev/{{ $labels.device }}) == {{ $value }} > %% monitoring_LinixDiskIOTimeHigh_limit %%"
 
 ###############################################################################
 

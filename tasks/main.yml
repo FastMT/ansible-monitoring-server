@@ -35,6 +35,16 @@
     - { mode: 777, path: "certbot/conf" }
     - { mode: 777, path: "certbot/log" }
 
+- name: Set default scrape folder
+  set_fact:
+    scrape_folders:
+      - { path: "{{ environment_name }}" }
+  when: scrape_folders is not defined
+
+- name: Print scrape folders
+  debug:
+    msg: "An item: {{ item.path }}, {{ item.proxy_url | default ('') }}"
+  with_items: "{{ scrape_folders }}"
 
 - name: Create custom monitoring folders
   file: 
@@ -43,12 +53,6 @@
     mode: "755"
   become: yes
   with_items: "{{ scrape_folders }}"
-
-- name: Print scrape folders
-  debug:
-    msg: "An item: {{ item.path }}, {{ item.proxy_url | default ('') }}"
-  with_items: "{{ scrape_folders }}"
-  when: scrape_folders is defined
 
 # Create custom scrape folders config
 # Use honor_labels: false string when proxy_url is not defined as a workaround 
@@ -81,10 +85,12 @@
   register: upload_templates
 
 - name: Deploy config files
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src:  "{{ item.src }}"
     dest: "{{ item.dst }}"
     mode: "{{ item.mode }}"
+    variable_start_string: "%%"
+    variable_end_string: "%%"
   become: yes
   loop:
     - { mode: 644, src: "prometheus/alerts/exporter.yml",   dst: "{{ monitoring_root }}/prometheus/alerts" }
