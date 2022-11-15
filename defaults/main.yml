@@ -9,4 +9,7 @@ monitoring_prometheus_retention_size: "120GB"
 monitoring_prometheus_retention_time: "365d"
 
 monitoring_LinixDiskIOTimeHigh_limit: 0.5
-monitoring_LinixDiskIOTimeHigh_duration: "5m"
+monitoring_LinixDiskIOTimeHigh_time: "5m"
+
+monitoring_HostCpuStealNoisyNeighbor_limit: 10
+monitoring_HostCpuStealNoisyNeighbor_time: "5m"

@@ -53,7 +53,7 @@ groups:
   rules:
   - alert: LinixDiskIOTimeHigh
     expr: irate(node_disk_io_time_seconds_total [5m]) > %% monitoring_LinixDiskIOTimeHigh_limit %%
-    for: %% monitoring_LinixDiskIOTimeHigh_duration %%
+    for: %% monitoring_LinixDiskIOTimeHigh_time %%
     labels:
       severity: warning
     annotations:
@@ -156,12 +156,12 @@ groups:
       summary: "CPU load on instance {{ $labels.instance }} is > 80% (VALUE = {{ $value }})"
 
   - alert: HostCpuStealNoisyNeighbor
-    expr: avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > 10
-    for: 0m
+    expr: avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > %%monitoring_HostCpuStealNoisyNeighbor_limit%%
+    for: %%monitoring_HostCpuStealNoisyNeighbor_time%%
     labels:
       severity: warning
     annotations:
-      summary: "Host CPU steal is > 10% ({{ $value }}) on instance {{ $labels.instance }}"
+      summary: "Host CPU steal is > %%monitoring_HostCpuStealNoisyNeighbor_limit%% % ({{ $value }}) on instance {{ $labels.instance }}"
 
   # 1000 context switches is an arbitrary number.
   # Alert threshold depends on nature of application.
