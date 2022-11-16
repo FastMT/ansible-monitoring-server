@@ -85,7 +85,7 @@ groups:
       severity: warning
     annotations:
       summary: >-
-        Host Network Receive Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes
+        Host Network Receive Errors on instance {{ $labels.instance }} {{ printf "%.0f" $value }} errors in the last two minutes
 
   - alert: HostNetworkTransmitErrors
     expr: rate(node_network_transmit_errs_total[2m]) / rate(node_network_transmit_packets_total[2m]) > 0.01
@@ -94,7 +94,7 @@ groups:
       severity: warning
     annotations:
       summary: >-
-        Host Network Transmit Errors on instance {{ $labels.instance }} {{ printf \"%.0f\" $value }} errors in the last two minutes
+        Host Network Transmit Errors on instance {{ $labels.instance }} {{ printf "%.0f" $value }} errors in the last two minutes
 
   - alert: HostNetworkInterfaceSaturated
     expr: >-
@@ -106,7 +106,7 @@ groups:
       severity: warning
     annotations:
       summary: >-
-        Host Network Interface \"{{ $labels.device }}\" Saturated on instance {{ $labels.instance }} VALUE = {{ $value }}
+        Host Network Interface "{{ $labels.device }}" Saturated on instance {{ $labels.instance }} VALUE = {{ $value }}
 
   - alert: HostConntrackLimit
     expr: node_nf_conntrack_entries / node_nf_conntrack_entries_limit > 0.8
@@ -266,7 +266,7 @@ groups:
       severity: info
     annotations:
       summary: >-
-        Host {{ $labels.instance }} has had correctable {{ printf \"%.0f\" $value }} errors in the last minute. VALUE = {{ $value }}
+        Host {{ $labels.instance }} has had correctable {{ printf "%.0f" $value }} errors in the last minute. VALUE = {{ $value }}
 
   - alert: HostEdacUncorrectableErrorsDetected
     expr: node_edac_uncorrectable_errors_total > 0
@@ -275,7 +275,7 @@ groups:
       severity: warning
     annotations:
       summary: >-
-        Host {{ $labels.instance }} has had uncorrectable {{ printf \"%.0f\" $value }} errors. VALUE = {{ $value }}
+        Host {{ $labels.instance }} has had uncorrectable {{ printf "%.0f" $value }} errors. VALUE = {{ $value }}
 
 ###############################################################################
 
