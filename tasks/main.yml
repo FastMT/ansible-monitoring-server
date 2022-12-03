@@ -66,8 +66,16 @@
             - './{{ item.path }}/*.yml'
             refresh_interval: {{ monitoring_prometheus_refresh_interval }}
   with_items: "{{ scrape_folders }}"
-  when: scrape_folders is defined
-    
+
+# Add extra jobs from variable
+- set_fact:
+    scrape_config: |
+      {{ scrape_config }}
+
+      {{ monitoring_extra_jobs | to_yaml }}
+
+  when: monitoring_extra_jobs is defined
+
 - name: Deploy Prometheus configuration files from templates
   ansible.builtin.template:
     src:  "{{ item.src }}"
