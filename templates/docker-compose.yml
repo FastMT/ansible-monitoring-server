@@ -6,7 +6,7 @@ services:
     image: nginx:latest
     container_name: prom-nginx
     ports:
-      - 443:443
+      - "443:443"
     restart: always
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
@@ -22,8 +22,8 @@ services:
     volumes:
       - "./prometheus-data:/prometheus"
       - "./prometheus:/etc/prometheus"
-    expose:
-      - 9090
+    ports:
+      - "127.0.0.1:9090:9090"
     command: >-
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.retention.size {{ monitoring_prometheus_retention_size }}
@@ -36,8 +36,8 @@ services:
     volumes:
       - "./alertmanager:/etc/alertmanager"
       - "./alertmanager-data:/alertmanager/"
-    expose:
-      - 9093
+    ports:
+      - "127.0.0.1:9093:9093"
     command: >-
       --config.file=/etc/alertmanager/alertmanager.yml
       --storage.path=/alertmanager
@@ -61,8 +61,8 @@ services:
       - "GF_SMTP_FROM_ADDRESS={{ monitoring_mail_from | default(monitoring_mail_user)}}"
       - "GF_SMTP_PASSWORD={{ monitoring_mail_password }}"
 {% endif %}
-    expose:
-      - 3000
+    ports:
+      - "127.0.0.1:3000:3000"
     depends_on:
       - prometheus
 
@@ -75,8 +75,8 @@ services:
       - "./loki-data:/loki"
       - "./loki/loki-config.yml:/etc/loki/local-config.yaml"
       - "./loki/alerts:/loki/rules/fake"
-    expose:
-      - 3100
+    ports:
+      - "127.0.0.1:3100:3100"
 {% endif %}
 
   node-exporter:
@@ -91,8 +91,8 @@ services:
       - '--path.sysfs=/host/sys'
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-    expose:
-      - "9100"
+    ports:
+      - "127.0.0.1:9100:9100"
     restart: always
 
   cadvisor:

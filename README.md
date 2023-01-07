@@ -1,5 +1,13 @@
 # ansible-ubuntu-common
-Ansible role to configure basic parameters on linux (Ubuntu) server
+Ansible role to configure monitoring system based on Prometheus and Grafana
+
+## Components
+
+- Nginx as HTTPS edge server
+- Prometheus
+- Alertmanager with telegram notifications
+- Grafana
+- Loki (optional)
 
 ## Installation
 
@@ -9,7 +17,7 @@ Create requirements.yml file
 # Include monitoring-server role
 - src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
-  version: "v1.0.2"
+  version: "v1.0.3"
 ```
 
 Install external module into ~/.ansible/roles folder
@@ -48,5 +56,16 @@ playbook.yml:
 
       # Optional parameter for Prometheus scrape interval
       monitoring_prometheus_refresh_interval: "10s"
+
+      # Optional Prometheus scrape folders
+      scrape_folders:
+        - { path: "linux" }
+        - { path: "windows", proxy_url="http://192.16.1.100:8080" }
+        - { path: "envoy", metrics_path: "/stats/prometheus" }
+
+      # Optional extra Prometheus jobs
+      monitoring_extra_jobs:
+        - job_name: 'extra_job'
+          ...
 
 ```   
