@@ -1,4 +1,4 @@
-# ansible-ubuntu-common
+# ansible-monitoring-server
 Ansible role to configure monitoring system based on Prometheus and Grafana
 
 ## Components
