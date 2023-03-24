@@ -6,7 +6,7 @@ services:
     image: nginx:latest
     container_name: prom-nginx
     ports:
-      - "443:443"
+      - "${MONITORING_SERVER_IP:-0.0.0.0}:443:443"
     restart: always
     volumes:
       - ./nginx/conf/:/etc/nginx/conf.d/:ro
@@ -26,8 +26,8 @@ services:
       - "127.0.0.1:9090:9090"
     command: >-
       --config.file=/etc/prometheus/prometheus.yml
-      --storage.tsdb.retention.size {{ monitoring_prometheus_retention_size }}
-      --storage.tsdb.retention.time {{ monitoring_prometheus_retention_time }}
+      --storage.tsdb.retention.size ${MONITORING_PROMETHEUS_RETENTION_SIZE}
+      --storage.tsdb.retention.time ${MONITORING_PROMETHEUS_RETENTION_TIME}
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -53,13 +53,13 @@ services:
     environment:
       - "GF_INSTALL_PLUGINS=camptocamp-prometheus-alertmanager-datasource,grafana-piechart-panel"
       - "GF_USERS_DEFAULT_THEME=light"
-      - "GF_SERVER_ROOT_URL=https://{{ monitoring_server_host | default (inventory_hostname) }}"
+      - "GF_SERVER_ROOT_URL=https://"
 {% if monitoring_mail_server is defined %}
       - "GF_SMTP_ENABLED=true"
-      - "GF_SMTP_HOST={{ monitoring_mail_server }}:25"
-      - "GF_SMTP_USER={{ monitoring_mail_user }}"
-      - "GF_SMTP_FROM_ADDRESS={{ monitoring_mail_from | default(monitoring_mail_user)}}"
-      - "GF_SMTP_PASSWORD={{ monitoring_mail_password }}"
+      - "GF_SMTP_HOST=${MONITORING_MAIL_SERVER}:${MONITORING_MAIL_SERVER_PORT}"
+      - "GF_SMTP_USER=${MONITORING_MAIL_USER}"
+      - "GF_SMTP_FROM_ADDRESS=${MONITORING_MAIL_FROM}"
+      - "GF_SMTP_PASSWORD=${MONITORING_MAIL_PASSWORD}"
 {% endif %}
     ports:
       - "127.0.0.1:3000:3000"
@@ -79,6 +79,7 @@ services:
       - "127.0.0.1:3100:3100"
 {% endif %}
 
+{% if node_exporter_enabled | default(false) %}
   node-exporter:
     image: prom/node-exporter:latest
     container_name: prom-node-exporter
@@ -94,7 +95,9 @@ services:
     ports:
       - "127.0.0.1:9100:9100"
     restart: always
+{% endif %}
 
+{% if cadvisor_enabled | default(false) %}
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: prom-cadvisor
@@ -106,3 +109,4 @@ services:
     expose:
       - "8080"
     restart: always
+{% endif %}

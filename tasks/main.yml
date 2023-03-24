@@ -90,6 +90,7 @@
     #    - { mode: 644, src: "loki/loki-config.yml",             dst: "{{ monitoring_root }}/loki" }
     - { mode: 644, src: "nginx/monitoring.conf", dst: "/nginx/conf" }
     - { mode: 644, src: "docker-compose.yml", dst: "" }
+    - { mode: 644, src: ".env", dst: "" }
     - { mode: 755, src: "certbot.sh", dst: "" }
   register: upload_templates
 

@@ -1,11 +1,15 @@
+{% if node_exporter_enabled | default(false) %}
 - targets: ["node-exporter:9100"]
   labels:
     instance: "{{ inventory_hostname }}"
     environment: "local"
     exporter_type: "linux"
+{% endif %}
 
+{% if cadvisor_enabled | default(false) %}
 - targets: ["cadvisor:8080"]
   labels:
     instance: "{{ inventory_hostname }}"
     environment: "local"
     exporter_type: "cadvisor"
+{% endif %}

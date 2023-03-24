@@ -17,7 +17,7 @@ Create requirements.yml file
 # Include monitoring-server role
 - src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
-  version: "v1.0.3"
+  version: "v1.0.4"
 ```
 
 Install external module into ~/.ansible/roles folder
@@ -34,11 +34,21 @@ playbook.yml:
 # Configure Ubuntu common parameters
 - role: monitoring-server"
     vars:
+
+      # Monitoring host URL name (default inventory_hostname) and bind IP (default 0.0.0.0)
+      monitoring_server_host: "monitoring.company.com"
+      monitoring_server_ip: "11.22.33.44"
+
       # Email for letsencrypt certificates
       letsencrypt_email: "user@server.com"
 
+      # Deploy node_exporter and cadvisor containers (default true)
+      node_exporter_enabled: true
+      cadvisor_enabled: true
+
       # Optional mail server parameters
       monitoring_mail_server:       "smtp.server.com"
+      monitoring_mail_server_port:  "25"
       monitoring_mail_user:         "user@server.com"
       monitoring_mail_password:     "pa$$word"
 
@@ -68,4 +78,4 @@ playbook.yml:
         - job_name: 'extra_job'
           ...
 
-```   
+```
