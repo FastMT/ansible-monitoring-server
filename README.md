@@ -17,7 +17,7 @@ Create requirements.yml file
 # Include monitoring-server role
 - src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
-  version: "v1.0.6"
+  version: "v1.0.7"
 ```
 
 Install external module into ~/.ansible/roles folder
