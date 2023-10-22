@@ -17,7 +17,7 @@ Create requirements.yml file
 # Include monitoring-server role
 - src: https://github.com/FastMT/ansible-monitoring-server.git
   name: monitoring-server
-  version: "v1.0.7"
+  version: "v1.0.8"
 ```
 
 Install external module into ~/.ansible/roles folder
@@ -38,6 +38,9 @@ playbook.yml:
       # Monitoring host URL name (default inventory_hostname) and bind IP (default 0.0.0.0)
       monitoring_server_host: "monitoring.company.com"
       monitoring_server_ip: "11.22.33.44"
+
+      # Certificate generation mode
+      monitoring_certificate: "selfsigned" | "letsencrypt" (default "letsencrypt")
 
       # Email for letsencrypt certificates
       letsencrypt_email: "user@server.com"

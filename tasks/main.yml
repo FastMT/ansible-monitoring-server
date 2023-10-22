@@ -91,7 +91,7 @@
     - { mode: 644, src: "nginx/monitoring.conf", dst: "/nginx/conf" }
     - { mode: 644, src: "docker-compose.yml", dst: "" }
     - { mode: 644, src: ".env", dst: "" }
-    - { mode: 755, src: "certbot.sh", dst: "" }
+    - { mode: 755, src: "certificate.sh", dst: "" }
   register: upload_templates
 
 - name: Deploy config files
@@ -130,8 +130,8 @@
       }
   register: upload_files
 
-- name: Run certbot to generate certificate if it does not exist
-  ansible.builtin.shell: "./certbot.sh"
+- name: Run script to generate certificate if it does not exist
+  ansible.builtin.shell: "./certificate.sh"
   args:
     chdir: "{{ monitoring_root }}"
     creates: "{{ monitoring_root }}/certbot/conf/live/{{ monitoring_server_host | default (inventory_hostname) }}/fullchain.pem"
@@ -139,7 +139,7 @@
   check_mode: no
   register: certbot_gen
 
-- name: Print certbot script output
+- name: Print script script output
   debug:
     var: certbot_gen
   when: certbot_gen.changed
@@ -184,6 +184,7 @@
     minute: "11"
     hour: "23"
     user: root
-    job: "cd {{monitoring_root}} && bash ./certbot.sh"
+    job: "cd {{monitoring_root}} && bash ./certificate.sh"
     cron_file: monitoring_certbot
   become: true
+  when: monitoring_certificate | default ('letsencrypt') == 'letsencrypt'

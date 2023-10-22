@@ -8,6 +8,10 @@ cadvisor_enabled: true
 # Prometheus scrape interval
 monitoring_prometheus_refresh_interval: "10s"
 
+# Generate certificate: self-signed / letsencrypt
+monitoring_certificate: letsencrypt
+# monitoring_certificate: selfsigned
+
 # Linux alerts thresholds
 
 # Min disk space in %
