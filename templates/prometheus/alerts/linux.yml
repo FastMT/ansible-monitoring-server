@@ -4,7 +4,7 @@ groups:
 - name: LinuxFreeDiskSpace
   rules:
   - alert: LinuxDiskSpacePercent
-    expr: 100*node_filesystem_free_bytes/node_filesystem_size_bytes{fstype="ext4"} < %%monitoring_LinuxDiskSpacePercent_limit%%
+    expr: 100*node_filesystem_free_bytes/node_filesystem_size_bytes{fstype=~"ext4|nfs4"} < %%monitoring_LinuxDiskSpacePercent_limit%%
     for: %%monitoring_LinuxDiskSpacePercent_time%%
     labels:
       severity: warning
@@ -14,7 +14,7 @@ groups:
 
   - alert: LinuxDiskSpaceGb
     # Checking only volumes with size >10Gb
-    expr: node_filesystem_free_bytes{fstype="ext4"}/1024/1024/1024 < %%monitoring_LinuxDiskSpaceGb_limit%% and node_filesystem_size_bytes{fstype="ext4"} >10*1024*1024*1024
+    expr: node_filesystem_free_bytes{fstype=~"ext4|nfs4"}/1024/1024/1024 < %%monitoring_LinuxDiskSpaceGb_limit%% and node_filesystem_size_bytes{fstype=~"ext4|nfs4"} >10*1024*1024*1024
     for: %%monitoring_LinuxDiskSpaceGb_time%%
     labels:
       severity: warning
@@ -26,7 +26,7 @@ groups:
   # "--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($|/)".
   # Same rule using "node_filesystem_free_bytes" will fire when disk fills for non-root users.
   - alert: HostDiskWillFillIn24Hours
-    expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs"}[1h], 24 * 3600) < 0 and node_filesystem_size_bytes{fstype="ext4"} >10*1024*1024*1024
+    expr: (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs"}[1h], 24 * 3600) < 0 and node_filesystem_size_bytes{fstype=~"ext4|nfs4"} >10*1024*1024*1024
     for: 2m
     labels:
       severity: warning
